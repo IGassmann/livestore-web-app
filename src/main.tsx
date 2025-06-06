@@ -85,7 +85,6 @@ const ItemRow = React.memo(({ item }: { item: Item }) => {
       <td>{item.id}</td>
       <td>
         <Button
-          id={`select-${item.id}`}
           onClick={() => {
             store.commit(events.uiStateSet({ selected: item.id }))
           }}
@@ -95,7 +94,6 @@ const ItemRow = React.memo(({ item }: { item: Item }) => {
       </td>
       <td>
         <Button
-          id={`remove-${item.id}`}
           onClick={() => {
             store.commit(events.itemDeleted({ id: item.id }))
           }}
@@ -114,8 +112,8 @@ const ItemRowList = React.memo(() => {
 })
 
 const Button = React.memo(
-  ({ id, onClick, children }: { id: string; onClick: () => void; children: React.ReactNode }) => (
-    <button type="button" id={id} onClick={onClick}>
+  ({ onClick, children }: { onClick: () => void; children: React.ReactNode }) => (
+    <button type="button" onClick={onClick}>
       {children}
     </button>
   ),
@@ -126,20 +124,27 @@ const Main = () => {
   return (
     <div>
       <div>
-        <h1>React + LiveStore</h1>
+        <h2>Reproduction Steps</h2>
+        <ol>
+          <li>
+            Click ...
+          </li>
+        </ol>
+        <h2>Observations</h2>
+        <ul>
+          <li>
+            A "..." error is logged in the console
+          </li>
+        </ul>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <Button
-            id="create1k"
             onClick={() => {
-              // We commit a single event instead of one per item to better represent user intention. The user didn’t press a button 1000 times for each item; they pressed it once to create 1000 items.
-              // We need to include the items in the event payload rather than generating them in the materializer. Otherwise, the materializer wouldn’t be deterministic.
               store.commit(events.thousandItemsCreated(generateRandomItems(1000)))
             }}
           >
             Create 1,000 items (1 event)
           </Button>
           <Button
-            id="create1k"
             onClick={() => {
               store.commit(...generateRandomItems(1000).map((item) => events.itemCreated(item)))
             }}
@@ -147,7 +152,6 @@ const Main = () => {
             Create 1,000 items (n events, 1 commit)
           </Button>
           <Button
-            id="create1k"
             onClick={() => {
               generateRandomItems(1000).map((item) => {
                 store.commit(events.itemCreated(item))
@@ -157,7 +161,6 @@ const Main = () => {
             Create 1,000 items (n events, n commits)
           </Button>
           <Button
-            id="create10k"
             onClick={() => {
               store.commit(events.tenThousandItemsCreated(generateRandomItems(10_000)))
             }}
@@ -165,7 +168,6 @@ const Main = () => {
             Create 10,000 items
           </Button>
           <Button
-            id="append1k"
             onClick={() => {
               store.commit(events.thousandItemsAppended(generateRandomItems(1000)))
             }}
@@ -173,7 +175,6 @@ const Main = () => {
             Append 1,000 items
           </Button>
           <Button
-            id="updateEvery10th"
             onClick={() => {
               store.commit(events.everyTenthItemUpdated())
             }}
@@ -181,7 +182,6 @@ const Main = () => {
             Update every 10th items
           </Button>
           <Button
-            id="clear"
             onClick={() => {
               store.commit(events.allItemsDeleted())
             }}
@@ -191,7 +191,7 @@ const Main = () => {
         </div>
       </div>
       <table>
-        <tbody id="table-body">
+        <tbody>
           <ItemRowList />
         </tbody>
       </table>
