@@ -121,65 +121,79 @@ const Button = React.memo(
 
 const Main = () => {
   const { store } = useStore()
+  const [eventsToBeCreated, setEventsToBeCreated] = React.useState(1000)
   return (
     <div>
       <div>
         <h2>Reproduction Steps</h2>
         <ol>
           <li>
-            Click ...
+            Open two tabs of this app in the same browser, and display them side by side.
+          </li>
+          <li>
+            Click "Create 1,000 events (n events, 1 commit)" or "Create 1,000 items (n events, n commits)" in one of the tabs
           </li>
         </ol>
         <h2>Observations</h2>
         <ul>
           <li>
-            A "..." error is logged in the console
+            The other tab only received ~2-3 events instead of the expected 1,000 events.
+          </li>
+          <li>
+            No errors are shown in the console of either tab.
+          </li>
+          <li>
+            An error/exception can be observed in the <code>@livestore/adapter-web:client-session:runInWorker:PushToLeader</code> OTel span:
+            <pre>
+              <code>
+{`exception
+├──exception.message: { "minimumExpectedNum": {"global":2,"client":0}, "providedNum": {"global":2,"client":0} }
+├──exception.stacktrace: LeaderAheadError: { "minimumExpectedNum": {"global":2,"client":0}, "providedNum": {"global":2,"client":0} }
+└──exception.type: LeaderAheadError`}
+              </code>
+            </pre>
+          </li>
+          <li>
+            If you commit any event on the other tab, it will then receive all the previously created events from the first tab.
+          </li>
+          <li>
+            If you commit another event on the first tab, it won't be received by the other tab.
+          </li>
+          <li>
+            The issue only occurs when opening fresh new tabs of the app.
+          </li>
+          <li>
+            The issue only occurs when the number of events created is approximately greater than 247 events. At around 247 events, the issue occurs sporadically.
           </li>
         </ul>
+        <div>
+          <label>
+            Number of events to be created:
+            <input
+              type="range"
+              value={eventsToBeCreated}
+              min={1}
+              max={1000}
+              onChange={(e) => setEventsToBeCreated(Number(e.target.value))}
+            />
+          </label>
+        </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <Button
             onClick={() => {
-              store.commit(events.thousandItemsCreated(generateRandomItems(1000)))
+              store.commit(...generateRandomItems(eventsToBeCreated).map((item) => events.itemCreated(item)))
             }}
           >
-            Create 1,000 items (1 event)
+            Create {eventsToBeCreated} events (n events, 1 commit)
           </Button>
           <Button
             onClick={() => {
-              store.commit(...generateRandomItems(1000).map((item) => events.itemCreated(item)))
-            }}
-          >
-            Create 1,000 items (n events, 1 commit)
-          </Button>
-          <Button
-            onClick={() => {
-              generateRandomItems(1000).map((item) => {
+              generateRandomItems(eventsToBeCreated).map((item) => {
                 store.commit(events.itemCreated(item))
               })
             }}
           >
-            Create 1,000 items (n events, n commits)
-          </Button>
-          <Button
-            onClick={() => {
-              store.commit(events.tenThousandItemsCreated(generateRandomItems(10_000)))
-            }}
-          >
-            Create 10,000 items
-          </Button>
-          <Button
-            onClick={() => {
-              store.commit(events.thousandItemsAppended(generateRandomItems(1000)))
-            }}
-          >
-            Append 1,000 items
-          </Button>
-          <Button
-            onClick={() => {
-              store.commit(events.everyTenthItemUpdated())
-            }}
-          >
-            Update every 10th items
+            Create {eventsToBeCreated} events (n events, n commits)
           </Button>
           <Button
             onClick={() => {

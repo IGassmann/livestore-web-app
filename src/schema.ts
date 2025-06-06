@@ -33,23 +33,7 @@ export const tables = { items, uiState }
 
 const materializers = State.SQLite.materializers(events, {
   'v1.ItemCreated': (item) => items.insert(item),
-  'v1.ThousandItemsCreated': (thousandItems) => [items.delete(), ...thousandItems.map((item) => items.insert(item))],
-  'v1.TenThousandItemsCreated': (tenThousandItems) => [
-    items.delete(),
-    ...tenThousandItems.map((item) => items.insert(item)),
-  ],
-  'v1.ThousandItemsAppended': (thousandItems) => thousandItems.map((item) => items.insert(item)),
   'v1.ItemDeleted': ({ id }) => items.delete().where({ id }),
-  'v1.EveryTenthItemUpdated': (_, ctx) => {
-    const allItems = ctx.query(items.select())
-
-    const updates = []
-    for (let i = 0; i < allItems.length; i += 10) {
-      updates.push(items.update({ label: allItems[i]!.label + ' !!!' }).where({ id: allItems[i]!.id }))
-    }
-
-    return updates
-  },
   'v1.AllItemsDeleted': () => items.delete(),
 })
 
