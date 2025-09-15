@@ -12,7 +12,6 @@
     "@livestore/livestore": "0.4.0-dev.7",
     "@livestore/peer-deps": "0.4.0-dev.7",
     "@livestore/react": "0.4.0-dev.7",
-    "@livestore/react": "0.4.0-dev.7",
     "@livestore/wa-sqlite": "0.4.0-dev.7",
     "@opentelemetry/exporter-trace-otlp-http": "0.205.0",
     "@opentelemetry/resources": "2.1.0",
